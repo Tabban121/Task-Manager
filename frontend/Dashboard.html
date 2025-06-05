@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Manager Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3e8ff;
+      padding: 40px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: purple;
+    }
+    .btn {
+      display: block;
+      width: 50%;
+      padding: 14px;
+      margin: 10px 9px;
+      background-color: purple;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background-color: darkviolet;
+    }
+    .logout {
+      background-color: red;
+    }
+    .logout:hover {
+      background-color: darkred;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Task Manager Dashboard</h1>
+
+    <div id="notLoggedIn" style="display: none; color: red; text-align: center; font-weight: bold;">
+      You are not logged in. <a href="Login.html">Login here</a>
+    </div>
+
+    <div id="dashboardLinks" style="display: none;">
+      <!-- <a href="signup.html" class="btn">Sign Up</a>
+      <a href="login.html" class="btn">Login</a> -->
+      <a href="Task.html" class="btn">Add / Manage Tasks</a>
+      <a href="Logout.html" class="btn logout">Logout</a>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      document.getElementById("notLoggedIn").style.display = "block";
+    } else {
+      document.getElementById("dashboardLinks").style.display = "block";
+    }
+  </script>
+</body>
+</html>

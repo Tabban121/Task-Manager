@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3e8ff;
+      padding: 40px;
+    }
+    h2 {
+      color: purple;
+    }
+    .form-section, .task-card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: purple;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    button:hover {
+      background-color: darkviolet;
+    }
+    .btn-delete {
+      background-color: red;
+    }
+    .btn-delete:hover {
+      background-color: darkred;
+    }
+    .message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Add Task</h2>
+  <div class="form-section">
+    <form id="addTaskForm">
+      <input type="text" id="title" placeholder="Task Description" required />
+      <button type="submit">Add Task</button>
+      <div class="message" id="addTaskMsg"></div>
+    </form>
+  </div>
+
+  <h2>Your Tasks</h2>
+  <div id="taskList"></div>
+
+  <script>
+    const token = localStorage.getItem("authToken");
+
+    // ✅ Redirect if not logged in
+    if (!token) {
+      alert("You are not logged in. Redirecting to login...");
+      window.location.href = "login.html"; // You can change this to your login file
+    }
+
+    // ✅ Renders a task in the DOM
+    function renderTask(task) {
+      const taskDiv = document.createElement("div");
+      taskDiv.className = "task-card";
+      taskDiv.id = `task-${task._id}`;
+      taskDiv.innerHTML = `
+        <h3>${task.title}</h3>
+        <button onclick="editTask('${task._id}', '${task.title}')">Edit</button>
+        <button class="btn-delete" onclick="deleteTask('${task._id}')">Delete</button>
+        <div class="message" id="msg-${task._id}"></div>
+      `;
+      document.getElementById("taskList").appendChild(taskDiv);
+    }
+
+    // ✅ Add Task Handler
+    document.getElementById("addTaskForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const msg = document.getElementById("addTaskMsg");
+
+      try {
+        const res = await fetch("http://localhost:8000/api/tasks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ title })
+        });
+
+        const result = await res.json();
+        msg.textContent = res.ok ? "Task added!" : result.message || "Failed.";
+        msg.style.color = res.ok ? "green" : "red";
+
+        if (res.ok) {
+          document.getElementById("addTaskForm").reset();
+          renderTask(result); // show the new task
+        }
+      } catch (err) {
+        msg.textContent = "Server error.";
+        msg.style.color = "red";
+      }
+    });
+
+    // ✅ Edit Task Handler
+    async function editTask(id, currentTitle) {
+      const newTitle = prompt("Enter new task title:", currentTitle);
+      const msg = document.getElementById(`msg-${id}`);
+
+      if (!newTitle) return;
+
+      try {
+        const res = await fetch(`http://localhost:8000/api/tasks/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ title: newTitle })
+        });
+
+        const result = await res.json();
+        msg.textContent = res.ok ? "Updated!" : result.message || "Update failed.";
+        msg.style.color = res.ok ? "green" : "red";
+
+        if (res.ok) {
+          document.querySelector(`#task-${id} h3`).innerText = newTitle;
+        }
+      } catch (err) {
+        msg.textContent = "Server error.";
+        msg.style.color = "red";
+      }
+    }
+
+    // ✅ Delete Task Handler
+    async function deleteTask(id) {
+      const msg = document.getElementById(`msg-${id}`);
+      try {
+        const res = await fetch(`http://localhost:8000/api/tasks/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const result = await res.json();
+        msg.textContent = res.ok ? "Deleted!" : result.message || "Delete failed.";
+        msg.style.color = res.ok ? "green" : "red";
+
+        if (res.ok) {
+          document.getElementById(`task-${id}`).remove();
+        }
+      } catch (err) {
+        msg.textContent = "Server error.";
+        msg.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>

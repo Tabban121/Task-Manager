@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Logout</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3e8ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: darkred;
+    }
+    .message {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Logout</h2>
+    <button id="logoutButton">Log Out</button>
+    <div class="message" id="messageBox"></div>
+  </div>
+
+  <script>
+    document.getElementById("logoutButton").addEventListener("click", async function () {
+      const token = localStorage.getItem("authToken");
+      const messageBox = document.getElementById("messageBox");
+
+      if (!token) {
+        messageBox.style.color = "red";
+        messageBox.textContent = "No token found from Login. Please login first.";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8000/api/auth/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+        console.log("Logout response:", result);
+
+        if (response.ok) {
+          localStorage.removeItem("authToken");
+          messageBox.style.color = "green";
+          messageBox.textContent = "Logout successful :) ";
+        } else {
+          messageBox.style.color = "red";
+          messageBox.textContent = result.message || "Logout failed.";
+        }
+      } catch (err) {
+        console.error("Logout error:", err);
+        messageBox.style.color = "red";
+        messageBox.textContent = "Server error. Try again.";
+      }
+    });
+  </script>
+</body>
+</html>

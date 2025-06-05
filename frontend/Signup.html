@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Signup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3e8ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: purple;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: purple;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #5a00a1;
+    }
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .link a {
+      color: purple;
+      text-decoration: none;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Sign Up</h2>
+    <form id="signupForm">
+      <label for="name">Name</label>
+      <input type="text" id="name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required>
+
+      <button type="submit">Sign Up</button>
+    </form>
+    <div class="message" id="messageBox"></div>
+    <div class="link">
+      Already have an account? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const messageBox = document.getElementById("messageBox");
+
+      try {
+        const response = await fetch("http://localhost:8000/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageBox.style.color = "green";
+          messageBox.textContent = "Signup successful :) ";
+            // Optionally redirect to login page after signup
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1500);
+        } else {
+          messageBox.style.color = "red";
+          messageBox.textContent = result.message || "Signup failed.";
+        }
+      } catch (err) {
+        console.error("Signup error:", err);
+        messageBox.style.color = "red";
+        messageBox.textContent = "Server error backend. Try again later.";
+      }
+    });
+  </script>
+</body>
+</html>
